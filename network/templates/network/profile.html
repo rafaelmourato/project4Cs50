@@ -1,15 +1,9 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    {% if request.user.is_authenticated %}
-    <div>
-        <h3>New post</h3>
-        <form>
-            <input type="text" id="content">
-            <input type="submit">
-        </form>
-    </div>
-    {% endif %}
+    <h1>Profile</h1>
+    {{ following.count }}
+    {{ followers.count }}
     {% for item in posts%}
     <div>
         {{ item.content }}
@@ -18,4 +12,5 @@
         {{ item.time }}
     </div>
     {% endfor %}
+
 {% endblock %}
