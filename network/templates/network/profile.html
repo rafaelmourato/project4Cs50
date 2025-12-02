@@ -1,54 +1,58 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h1>{{creator.username}}</h1>
-    {% if user.is_authenticated and user != creator %}
-    <form action="{% url 'profile' creator.username %}" method="post">
-        {% csrf_token %}
-        {% if is_following %}
-            <button type="submit" class="btn btn-danger">Unfollow</button>
-        {% else %}
-            <button type="submit" class="btn btn-primary">Follow</button>
-        {% endif %}
-    </form>
+<div class="container mt-4">
+
+    {% if user.is_authenticated and user == creator %}
+        <div class="card p-3 mb-4">
+            <h4>New Post</h4>
+            <form action="{% url 'index' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" class="form-control mb-2" placeholder="What's happening?"></textarea>
+                <button class="btn btn-success">Post</button>
+            </form>
+        </div>
     {% endif %}
-    {{ following.count }}
-    {{ followers.count }}
-    {% for post in posts%}
-    <div class="post" id="post-{{ post.id }}">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ creator.username }}</h2>
+
+        {% if user.is_authenticated and user != creator %}
+        <form action="{% url 'profile' creator.username %}" method="post">
+            {% csrf_token %}
+            {% if is_following %}
+                <button class="btn btn-danger">Unfollow</button>
+            {% else %}
+                <button class="btn btn-primary">Follow</button>
+            {% endif %}
+        </form>
+        {% endif %}
+    </div>
+
+    <p><strong>Following:</strong> {{ following.count }} | 
+       <strong>Followers:</strong> {{ followers.count }}</p>
+
+    {% for post in posts %}
+    <div class="post-card border-bottom pb-3 pt-2">
+        <div class="post-header">
+            <span class="post-time">{{ post.time }}</span>
+        </div>
+
         <p id="content-{{ post.id }}">{{ post.content }}</p>
-        <p>{{ post.time }}</p>
 
         {% if request.user == post.creator %}
-            <button class="edit-btn" data-id="{{ post.id }}">Edit</button>
+            <button class="btn btn-sm btn-outline-secondary edit-btn" data-id="{{ post.id }}">Edit</button>
         {% else %}
-        <div>
-            <button class="like-btn" data-id="{{ post.id }}">
-                {% if user in post.likes.all %}
-                    Unlike
-                {% else %}
-                    Like
-                {% endif %}
+            <button class="btn btn-sm btn-outline-primary like-btn" data-id="{{ post.id }}">
+                {% if user in post.likes.all %}Unlike{% else %}Like{% endif %}
             </button>
 
-            <span id="likes-{{ post.id }}">
+            <span id="likes-{{ post.id }}" class="ms-2">
                 {{ post.likes.count }}
             </span> likes
-        </div>
         {% endif %}
     </div>
     {% endfor %}
-    {% if posts.paginator.num_pages > 1 %}
-    <div class="pagination">
-        {% if posts.has_previous %}
-            <a href="?page={{ posts.previous_page_number }}">Previous</a>
-        {% endif %}
 
-        <span>Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
-
-        {% if posts.has_next %}
-            <a href="?page={{ posts.next_page_number }}">Next</a>
-        {% endif %}
-    </div>
-    {% endif %}
+    {% include "network/pagination.html" %}
+</div>
 {% endblock %}

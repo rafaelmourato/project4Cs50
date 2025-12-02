@@ -1,42 +1,34 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h1>Following</h1>
-    {% if posts%}
-    {% for post in posts%}
-    <div class="post" id="post-{{ post.id }}">
-        <p id="content-{{ post.id }}">{{ post.content }}</p>
-        <a href="{% url 'profile' post.creator.username %}">{{ post.creator }}</a>
-        <p>{{ post.time }}</p>
-        <div>
-            <button class="like-btn" data-id="{{ post.id }}">
-                {% if user in post.likes.all %}
-                    Unlike
-                {% else %}
-                    Like
-                {% endif %}
+<div class="container mt-4">
+    <h2>Following</h2>
+
+    {% if posts %}
+        {% for post in posts %}
+        <div class="post-card border-bottom pb-3 pt-2">
+            <div class="post-header">
+                <a href="{% url 'profile' post.creator.username %}" class="post-author">
+                    {{ post.creator }}
+                </a>
+                <span class="post-time">{{ post.time }}</span>
+            </div>
+
+            <p id="content-{{ post.id }}">{{ post.content }}</p>
+
+            <button class="btn btn-sm btn-outline-primary like-btn" data-id="{{ post.id }}">
+                {% if user in post.likes.all %}Unlike{% else %}Like{% endif %}
             </button>
 
-            <span id="likes-{{ post.id }}">
+            <span id="likes-{{ post.id }}" class="ms-2">
                 {{ post.likes.count }}
             </span> likes
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
     {% else %}
-    <p>Start following people.</p>
-    {% endif%}
-    {% if posts.paginator.num_pages > 1 %}
-    <div class="pagination">
-        {% if posts.has_previous %}
-            <a href="?page={{ posts.previous_page_number }}">Previous</a>
-        {% endif %}
-
-        <span>Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
-
-        {% if posts.has_next %}
-            <a href="?page={{ posts.next_page_number }}">Next</a>
-        {% endif %}
-    </div>
+        <p class="text-muted">Start following people.</p>
     {% endif %}
+
+    {% include "network/pagination.html" %}
+</div>
 {% endblock %}
