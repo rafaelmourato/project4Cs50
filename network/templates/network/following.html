@@ -1,27 +1,13 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h1>{{creator.username}}</h1>
-    {% if user.is_authenticated and user != creator %}
-    <form action="{% url 'profile' creator.username %}" method="post">
-        {% csrf_token %}
-        {% if is_following %}
-            <button type="submit" class="btn btn-danger">Unfollow</button>
-        {% else %}
-            <button type="submit" class="btn btn-primary">Follow</button>
-        {% endif %}
-    </form>
-    {% endif %}
-    {{ following.count }}
-    {{ followers.count }}
+    <h1>Following</h1>
+    {% if posts%}
     {% for post in posts%}
     <div class="post" id="post-{{ post.id }}">
         <p id="content-{{ post.id }}">{{ post.content }}</p>
+        <a href="{% url 'profile' post.creator.username %}">{{ post.creator }}</a>
         <p>{{ post.time }}</p>
-
-        {% if request.user == post.creator %}
-            <button class="edit-btn" data-id="{{ post.id }}">Edit</button>
-        {% else %}
         <div>
             <button class="like-btn" data-id="{{ post.id }}">
                 {% if user in post.likes.all %}
@@ -35,9 +21,11 @@
                 {{ post.likes.count }}
             </span> likes
         </div>
-        {% endif %}
     </div>
     {% endfor %}
+    {% else %}
+    <p>Start following people.</p>
+    {% endif%}
     {% if posts.paginator.num_pages > 1 %}
     <div class="pagination">
         {% if posts.has_previous %}

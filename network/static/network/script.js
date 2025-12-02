@@ -21,20 +21,16 @@ function toggleLike(id) {
             console.log(data.error);
             return;
         }
-
-        // Atualizar texto do botão
         const btn = document.querySelector(`button[data-id='${id}']`);
         btn.innerText = data.liked ? "Unlike" : "Like";
-
-        // Atualizar contador visualmente
         document.getElementById(`likes-${id}`).innerText = data.like_count;
     });
 }
 
 function editPost(id) {
-    const contentEl = document.getElementById(`content-${id}`);
-    const oldContent = contentEl.innerText;
-    contentEl.innerHTML = `
+    const contentNew = document.getElementById(`content-${id}`);
+    const oldContent = contentNew.innerText;
+    contentNew.innerHTML = `
         <textarea id="textarea-${id}" class="edit-area">${oldContent}</textarea>
     `;
     const button = document.querySelector(`button[data-id='${id}']`);

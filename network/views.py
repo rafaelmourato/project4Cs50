@@ -63,44 +63,34 @@ def profile(request, creator):
         "is_following": is_following
     })
 
+@login_required
 def edit_post(request, post_id):
     if request.method != "PUT":
         return JsonResponse({"error": "PUT request required."}, status=400)
-
     post = Post.objects.get(id=post_id)
-
     if request.user != post.creator:
         return JsonResponse({"error": "Not authorized"}, status=403)
-
     data = json.loads(request.body)
     new_content = data.get("content", "").strip()
-
     if new_content == "":
         return JsonResponse({"error": "Content cannot be empty"}, status=400)
-
     post.content = new_content
     post.save()
-
     return JsonResponse({"message": "Post updated successfully", "content": new_content})
 
-
+@login_required
 def toggle_like(request, post_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=403)
-
     if request.method != "PUT":
         return JsonResponse({"error": "PUT request required"}, status=400)
-
     post = Post.objects.get(id=post_id)
-
-    # Se já curtiu → remove
     if request.user in post.likes.all():
         post.likes.remove(request.user)
         liked = False
     else:
         post.likes.add(request.user)
         liked = True
-
     return JsonResponse({
         "liked": liked,
         "like_count": post.likes.count()
@@ -109,8 +99,11 @@ def toggle_like(request, post_id):
 @login_required
 def following(request):
     following = User.objects.filter(followers__follower = request.user)
-    posts = Post.objects.filter(creator__in=following).order_by("-time")
-    return render(request, "network/index.html",  {
+    posts_list = Post.objects.filter(creator__in=following).order_by("-time")
+    paginator = Paginator(posts_list, 10)  # 10 posts por página
+    page_number = request.GET.get("page")
+    posts = paginator.get_page(page_number)
+    return render(request, "network/following.html",  {
         "posts": posts
     })
 
@@ -133,11 +126,9 @@ def login_view(request):
     else:
         return render(request, "network/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
