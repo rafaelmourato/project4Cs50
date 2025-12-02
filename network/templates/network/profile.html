@@ -2,15 +2,40 @@
 
 {% block body %}
     <h1>Profile</h1>
+    {% if user.is_authenticated and user != creator %}
+    <form action="{% url 'profile' creator.username %}" method="post">
+        {% csrf_token %}
+        {% if is_following %}
+            <button type="submit" class="btn btn-danger">Unfollow</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">Follow</button>
+        {% endif %}
+    </form>
+    {% endif %}
     {{ following.count }}
     {{ followers.count }}
-    {% for item in posts%}
-    <div>
-        {{ item.content }}
-        <a href="{% url 'profile' item.creator %}">{{ item.creator }}</a>
-        {{ item.likes.count }}
-        {{ item.time }}
+    {% for post in posts%}
+    <div class="post" id="post-{{ post.id }}">
+        <p id="content-{{ post.id }}">{{ post.content }}</p>
+        <p>{{ post.time }}</p>
+
+        {% if request.user == post.creator %}
+            <button class="edit-btn" data-id="{{ post.id }}">Edit</button>
+        {% else %}
+        <div>
+            <button class="like-btn" data-id="{{ post.id }}">
+                {% if user in post.likes.all %}
+                    Unlike
+                {% else %}
+                    Like
+                {% endif %}
+            </button>
+
+            <span id="likes-{{ post.id }}">
+                {{ post.likes.count }}
+            </span> likes
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
-
 {% endblock %}

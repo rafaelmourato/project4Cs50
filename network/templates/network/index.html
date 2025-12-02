@@ -4,18 +4,49 @@
     {% if request.user.is_authenticated %}
     <div>
         <h3>New post</h3>
-        <form>
-            <input type="text" id="content">
-            <input type="submit">
+        <form action="{% url 'index'%}" method="post">
+            {% csrf_token %}
+            <input type="text" name="content" id="content">
+            <input type="submit" value="Post">
         </form>
     </div>
     {% endif %}
-    {% for item in posts%}
-    <div>
-        {{ item.content }}
-        <a href="{% url 'profile' item.creator %}">{{ item.creator }}</a>
-        {{ item.likes.count }}
-        {{ item.time }}
+    {% for post in posts%}
+    <div class="post" id="post-{{ post.id }}">
+        <p id="content-{{ post.id }}">{{ post.content }}</p>
+        <a href="{% url 'profile' post.creator.username %}">{{ post.creator }}</a>
+        <p>{{ post.time }}</p>
+        {% if request.user == post.creator %}
+            <button class="edit-btn" data-id="{{ post.id }}">Edit</button>
+        {% else %}
+        <div>
+            <button class="like-btn" data-id="{{ post.id }}">
+                {% if user in post.likes.all %}
+                    Unlike
+                {% else %}
+                    Like
+                {% endif %}
+            </button>
+
+            <span id="likes-{{ post.id }}">
+                {{ post.likes.count }}
+            </span> likes
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
+
+    {% if posts.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+
+        {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
 {% endblock %}
